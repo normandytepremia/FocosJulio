@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Foco Crema de Leche · Canal TR</title>
+<title>Cremazo Normandy · Canal TR</title>
 <style>
 :root{
   --p:#082B73; --p2:#0d3a99; --p3:#1a52c4;
@@ -288,10 +288,10 @@ const QUOTE = { text:'"La meta no se cumple sola — se construye cliente a clie
    Para agregar una campaña nueva (ej. en agosto), copia un bloque y cambia
    id, name, icon, producto y csvUrl. El resto de la app la detecta sola. */
 const CAMPAIGNS=[
-  { id:'crema', name:'Foco Crema de Leche', icon:'🥛', producto:'Crema de Leche',
+  { id:'crema', name:'Cremazo Normandy', icon:'🥛', producto:'Crema de Leche',
     csvUrl:'https://docs.google.com/spreadsheets/d/e/2PACX-1vS5dDBsTv_H62qye11Qp2MiZakW6kAQxRB3zUijxx_wQVw3mrFTim_PTdzjQDu0zScmjRsVBydkXSfa/pub?gid=0&single=true&output=csv',
     start:'2026-07-21', end:'2026-08-01', premio:100000, activo:true, uniformDays:true },
-  { id:'yomax', name:'Foco Yomax', icon:'🧃', producto:'Yomax',
+  { id:'yomax', name:'Yomax Normandy', icon:'🧃', producto:'Yomax',
     csvUrl:'https://docs.google.com/spreadsheets/d/e/2PACX-1vReHewBVkMXx_oYOh7WM_BYeG6iSjzyG5mkw-ee18pVbywTIeQliO-coxds2DzXJJBOsRP77nSHsMOz/pub?gid=0&single=true&output=csv',
     start:'2026-07-21', end:'2026-08-01', premio:100000, activo:true, uniformDays:true }
 ];
@@ -326,7 +326,7 @@ const USERS=[
   {rol:'Vend', u:'P_MZL4', p:'P_MZL42026', g:'P_MZL'},
   {rol:'Vend', u:'P_MZL5', p:'P_MZL52026', g:'P_MZL'},
   {rol:'Vend', u:'P_MZL6', p:'P_MZL62026', g:'P_MZL'},
-  {rol:'Vend', u:'P_CAR1', p:'P_CAR12026', g:'P_MZL'}
+  {rol:'Vend', u:'P_CAR1', p:'P_CAR12026', g:'P_PER'}
 ];
 
 /* Condiciones adicionales por ruta y por campaña (presupuesto lácteos y averías).
@@ -730,6 +730,7 @@ function renderReglas(){
     <ul class="rulelist">
       <li><span class="num">1</span><span>Cumplir la meta de <b>clientes nuevos</b> y la meta de <b>unidades</b> de ${c.producto} en tu ruta.</span></li>
       <li><span class="num">2</span><span>Tener el cumplimiento de <b>presupuesto de lácteos por encima del 95%</b>.</span></li>
+      <li><span class="num">3</span><span>Estar <b>vinculado laboralmente con Normandy</b> al momento de la verificación y el pago.</span></li>
     </ul>
   </div>
   <div class="rulecard">
@@ -742,7 +743,7 @@ function renderReglas(){
   </div>
   <div class="prizebox">
     <div class="amt">$${c.premio.toLocaleString('es-CO')}</div>
-    <div class="lbl">Para cada vendedor que cumpla las 2 condiciones</div>
+    <div class="lbl">Para cada vendedor que cumpla las 3 condiciones</div>
   </div>`;
   el.innerHTML=h;
 }
