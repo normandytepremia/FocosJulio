@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Foco Crema de Leche · Canal TR</title>
+<title>Cremazo Normandy · Canal TR</title>
 <style>
 :root{
   --p:#082B73; --p2:#0d3a99; --p3:#1a52c4;
@@ -101,7 +101,7 @@ header{background:var(--card);border-bottom:1px solid var(--line);padding:12px 2
   font-size:12px;font-weight:800;text-align:center}
 
 /* ═══ KPI GRID ═══ */
-.kgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px}
 .kc{background:var(--card);border-radius:14px;padding:16px;box-shadow:var(--shadow);border:1px solid var(--line);text-align:center}
 .kn{font-size:22px;font-weight:900;color:var(--p)}
 .kl{font-size:11px;font-weight:800;color:var(--ink2);text-transform:uppercase;letter-spacing:.4px;margin-top:3px}
@@ -129,7 +129,7 @@ header{background:var(--card);border-bottom:1px solid var(--line);padding:12px 2
 .gcardfoot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:10.5px;color:var(--ink2);margin-top:10px;font-weight:600}
 
 /* ═══ GOAL CARDS (vista de vendedor) ═══ */
-.goalgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.goalgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .goalcard{background:var(--card);border-radius:16px;padding:20px;box-shadow:var(--shadow);border:1px solid var(--line);
   border-top:4px solid var(--p2)}
 .goalcard.u{border-top-color:var(--gold)}
@@ -179,11 +179,10 @@ header{background:var(--card);border-bottom:1px solid var(--line);padding:12px 2
 .abtn.sec{background:var(--ink)}
 .abtn.ok{background:var(--good)}
 
-@media(max-width:900px){.kgrid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:900px){.goalgrid{grid-template-columns:1fr}}
 @media(max-width:640px){
   .mc{padding:14px 10px}
-  .gg,.goalgrid,.statrow{grid-template-columns:1fr}
-  .kgrid{grid-template-columns:repeat(2,1fr)}
+  .gg,.statrow{grid-template-columns:1fr}
   .lc{padding:30px 22px}
   .arow .who{width:90px}
   .hsub{display:none}
@@ -288,10 +287,10 @@ const QUOTE = { text:'"La meta no se cumple sola — se construye cliente a clie
    Para agregar una campaña nueva (ej. en agosto), copia un bloque y cambia
    id, name, icon, producto y csvUrl. El resto de la app la detecta sola. */
 const CAMPAIGNS=[
-  { id:'crema', name:'Foco Crema de Leche', icon:'🥛', producto:'Crema de Leche',
+  { id:'petit', name:'Reto Zoogur Petit', icon:'🍓', producto:'Zoogur Petit',
     csvUrl:'https://docs.google.com/spreadsheets/d/e/2PACX-1vS5dDBsTv_H62qye11Qp2MiZakW6kAQxRB3zUijxx_wQVw3mrFTim_PTdzjQDu0zScmjRsVBydkXSfa/pub?gid=0&single=true&output=csv',
     start:'2026-07-21', end:'2026-08-01', premio:100000, activo:true, uniformDays:true },
-  { id:'yomax', name:' Reto Yomax Normandy', icon:'🧃', producto:'Yomax',
+  { id:'yomax', name:'Reto Yomax', icon:'🧃', producto:'Yomax',
     csvUrl:'https://docs.google.com/spreadsheets/d/e/2PACX-1vReHewBVkMXx_oYOh7WM_BYeG6iSjzyG5mkw-ee18pVbywTIeQliO-coxds2DzXJJBOsRP77nSHsMOz/pub?gid=0&single=true&output=csv',
     start:'2026-07-21', end:'2026-08-01', premio:100000, activo:true, uniformDays:true }
 ];
@@ -460,14 +459,16 @@ function genDemoData(campId){
   const out={};
   USERS.filter(x=>x.rol==='Vend').forEach(x=>{
     const r=seedRand(campId+'_'+x.u);
-    const metaClientes = 12+Math.floor(r()*14);
-    const metaUnidades = 250+Math.floor(r()*450);
-    const f1=r()*1.25, f2=r()*1.25;
+    const metaClientesNuevos = 15+Math.floor(r()*70);
+    const metaClientesManejantes = Math.floor(r()*100);
+    const metaUnidades = 200+Math.floor(r()*600);
+    const f1=r()*1.25, f2=r()*1.25, f3=r()*1.25;
     out[x.u]={
       grupo:x.g, ruta:x.u,
-      metaClientes, metaUnidades,
-      clientesNuevos: Math.min(metaClientes+3, Math.round(metaClientes*f1)),
-      unidadesVendidas: Math.min(metaUnidades+60, Math.round(metaUnidades*f2))
+      metaClientesNuevos, metaClientesManejantes, metaUnidades,
+      clientesNuevos: Math.min(metaClientesNuevos+3, Math.round(metaClientesNuevos*f1)),
+      clientesManejantes: Math.min(metaClientesManejantes+5, Math.round(metaClientesManejantes*f2)),
+      unidadesVendidas: Math.min(metaUnidades+60, Math.round(metaUnidades*f3))
     };
   });
   return out;
@@ -475,12 +476,14 @@ function genDemoData(campId){
 function parseCSV(text){
   const lines=text.trim().split('\n').map(l=>l.split(',').map(c=>c.trim().replace(/^"|"$/g,'')));
   const head=lines[0].map(h=>h.toLowerCase());
-  const idx=k=>head.findIndex(h=>h.includes(k));
-  const iG=idx('grupo'), iR=head.findIndex(h=>h.includes('ruta')||h.includes('vendedor'));
-  const iMCf=head.findIndex(h=>h.includes('meta')&&h.includes('client'));
-  const iMUf=head.findIndex(h=>h.includes('meta')&&h.includes('unidad'));
-  const iCNf=head.findIndex(h=>(h.includes('cliente')&&!h.includes('meta')));
-  const iUVf=head.findIndex(h=>(h.includes('unidad')&&!h.includes('meta')));
+  const iG=head.findIndex(h=>h.includes('grupo'));
+  const iR=head.findIndex(h=>h.includes('ruta')||h.includes('vendedor'));
+  const iMCN=head.findIndex(h=>h.includes('meta')&&h.includes('client')&&h.includes('nuevo'));
+  const iMCM=head.findIndex(h=>h.includes('meta')&&h.includes('client')&&h.includes('manejant'));
+  const iMU =head.findIndex(h=>h.includes('meta')&&h.includes('unidad'));
+  const iCN =head.findIndex(h=>h.includes('client')&&h.includes('nuevo')&&!h.includes('meta'));
+  const iCM =head.findIndex(h=>h.includes('client')&&h.includes('manejant')&&!h.includes('meta'));
+  const iUV =head.findIndex(h=>h.includes('unidad')&&!h.includes('meta'));
   const out={};
   for(let i=1;i<lines.length;i++){
     const row=lines[i]; if(row.length<2||!row[iR]) continue;
@@ -488,10 +491,12 @@ function parseCSV(text){
     out[ruta]={
       grupo:(row[iG]||'').trim(),
       ruta,
-      metaClientes: parseFloat(row[iMCf])||0,
-      metaUnidades: parseFloat(row[iMUf])||0,
-      clientesNuevos: parseFloat(row[iCNf])||0,
-      unidadesVendidas: parseFloat(row[iUVf])||0
+      metaClientesNuevos: parseFloat(row[iMCN])||0,
+      metaClientesManejantes: parseFloat(row[iMCM])||0,
+      metaUnidades: parseFloat(row[iMU])||0,
+      clientesNuevos: parseFloat(row[iCN])||0,
+      clientesManejantes: parseFloat(row[iCM])||0,
+      unidadesVendidas: parseFloat(row[iUV])||0
     };
   }
   return out;
@@ -519,19 +524,22 @@ async function loadCampaignData(campId){
 /* ─────────── HELPERS DE CÁLCULO ─────────── */
 function rutaMetrics(ruta){
   const d=D[cur] ? D[cur][ruta] : null; if(!d) return null;
-  const pctC = d.metaClientes ? (d.clientesNuevos/d.metaClientes*100) : 0;
-  const pctU = d.metaUnidades ? (d.unidadesVendidas/d.metaUnidades*100) : 0;
-  const cumpleAmbas = pctC>=100 && pctU>=100;
+  const pctCN = d.metaClientesNuevos ? (d.clientesNuevos/d.metaClientesNuevos*100) : 0;
+  const pctCM = d.metaClientesManejantes ? (d.clientesManejantes/d.metaClientesManejantes*100) : 0;
+  const pctU  = d.metaUnidades ? (d.unidadesVendidas/d.metaUnidades*100) : 0;
+  const cumpleTodas = pctCN>=100 && pctCM>=100 && pctU>=100;
   const ex=getExtra(cur, ruta);
-  const ganador = cumpleAmbas && ex.presupuesto===true;
-  return {...d, pctC, pctU, avg:(pctC+pctU)/2, cumpleAmbas, ganador};
+  const ganador = cumpleTodas && ex.presupuesto===true;
+  return {...d, pctCN, pctCM, pctU, avg:(pctCN+pctCM+pctU)/3, cumpleTodas, ganador};
 }
 function grupoMetrics(g){
   const rutas=USERS.filter(x=>x.rol==='Vend'&&x.g===g).map(x=>x.u);
-  let mC=0,mU=0,cN=0,uV=0;
-  rutas.forEach(r=>{ const d=D[cur]?D[cur][r]:null; if(!d) return; mC+=d.metaClientes; mU+=d.metaUnidades; cN+=d.clientesNuevos; uV+=d.unidadesVendidas; });
-  const pctC = mC? cN/mC*100:0, pctU = mU? uV/mU*100:0;
-  return { grupo:g, mC, mU, cN, uV, pctC, pctU, rutas: rutas.length };
+  let mCN=0,mCM=0,mU=0,cN=0,cM=0,uV=0;
+  rutas.forEach(r=>{ const d=D[cur]?D[cur][r]:null; if(!d) return;
+    mCN+=d.metaClientesNuevos; mCM+=d.metaClientesManejantes; mU+=d.metaUnidades;
+    cN+=d.clientesNuevos; cM+=d.clientesManejantes; uV+=d.unidadesVendidas; });
+  const pctCN = mCN? cN/mCN*100:0, pctCM = mCM? cM/mCM*100:0, pctU = mU? uV/mU*100:0;
+  return { grupo:g, mCN, mCM, mU, cN, cM, uV, pctCN, pctCM, pctU, rutas: rutas.length };
 }
 
 /* ─────────── RENDER: RESUMEN ─────────── */
@@ -557,13 +565,16 @@ function barInner(pct,pace,color){
   return '<i class="'+color+'" style="width:'+w+'%"></i>'+
     (pace!=null?'<div class="pace" style="left:'+Math.min(100,pace)+'%"></div>':'');
 }
-function kpiBanner(mC,cN,mU,uV,wp){
-  const pctC=mC?cN/mC*100:0, pctU=mU?uV/mU*100:0;
+function kpiBanner(mCN,cN,mCM,cM,mU,uV,wp){
+  const pctCN=mCN?cN/mCN*100:0, pctCM=mCM?cM/mCM*100:0, pctU=mU?uV/mU*100:0;
+  const clr=p=>semColor(p,wp.pct)==='red'?'var(--bad)':'var(--p)';
   return `<div class="kgrid">
-    <div class="kc"><div class="kn">${mC.toLocaleString('es-CO')}</div><div class="kl">Meta Clientes</div><div class="ks">Canal completo</div></div>
-    <div class="kc"><div class="kn" style="color:${semColor(pctC,wp.pct)==='red'?'var(--bad)':'var(--p)'}">${pctC.toFixed(0)}%</div><div class="kl">Cumpl. Clientes</div><div class="ks">${Math.round(cN).toLocaleString('es-CO')} de ${mC.toLocaleString('es-CO')}</div></div>
-    <div class="kc"><div class="kn">${mU.toLocaleString('es-CO')}</div><div class="kl">Meta Unidades</div><div class="ks">Canal completo</div></div>
-    <div class="kc"><div class="kn" style="color:${semColor(pctU,wp.pct)==='red'?'var(--bad)':'var(--p)'}">${pctU.toFixed(0)}%</div><div class="kl">Cumpl. Unidades</div><div class="ks">${Math.round(uV).toLocaleString('es-CO')} de ${mU.toLocaleString('es-CO')}</div></div>
+    <div class="kc"><div class="kn">${Math.round(mCN).toLocaleString('es-CO')}</div><div class="kl">Meta Clientes Nuevos</div><div class="ks">Canal completo</div></div>
+    <div class="kc"><div class="kn" style="color:${clr(pctCN)}">${pctCN.toFixed(0)}%</div><div class="kl">Cumpl. Clientes Nuevos</div><div class="ks">${Math.round(cN).toLocaleString('es-CO')} de ${Math.round(mCN).toLocaleString('es-CO')}</div></div>
+    <div class="kc"><div class="kn">${Math.round(mCM).toLocaleString('es-CO')}</div><div class="kl">Meta Clientes Manejantes</div><div class="ks">Canal completo</div></div>
+    <div class="kc"><div class="kn" style="color:${clr(pctCM)}">${pctCM.toFixed(0)}%</div><div class="kl">Cumpl. Clientes Manejantes</div><div class="ks">${Math.round(cM).toLocaleString('es-CO')} de ${Math.round(mCM).toLocaleString('es-CO')}</div></div>
+    <div class="kc"><div class="kn">${Math.round(mU).toLocaleString('es-CO')}</div><div class="kl">Meta Unidades</div><div class="ks">Canal completo</div></div>
+    <div class="kc"><div class="kn" style="color:${clr(pctU)}">${pctU.toFixed(0)}%</div><div class="kl">Cumpl. Unidades</div><div class="ks">${Math.round(uV).toLocaleString('es-CO')} de ${Math.round(mU).toLocaleString('es-CO')}</div></div>
     <div class="kc"><div class="kn" style="color:var(--gold)">${wp.pct.toFixed(0)}%</div><div class="kl">Avance del Mes</div><div class="ks">día ${wp.elapsed}/${wp.total}</div></div>
   </div>`;
 }
@@ -577,40 +588,47 @@ function rutaMasBaja(g){
   if(!rutas.length) return null;
   return rutas.reduce((min,r)=>r.avg<min.avg?r:min, rutas[0]);
 }
+function statPairs(mCN,cN,mCM,cM,mU,uV){
+  return `<div class="statrow">
+      <div class="statbox"><div class="statn">${Math.round(mCN).toLocaleString('es-CO')}</div><div class="statl">META CLIENTES NUEVOS</div></div>
+      <div class="statbox"><div class="statn">${Math.round(cN).toLocaleString('es-CO')}</div><div class="statl">CLIENTES NUEVOS</div></div>
+    </div>
+    <div class="statrow">
+      <div class="statbox"><div class="statn">${Math.round(mCM).toLocaleString('es-CO')}</div><div class="statl">META CLIENTES MANEJANTES</div></div>
+      <div class="statbox"><div class="statn">${Math.round(cM).toLocaleString('es-CO')}</div><div class="statl">CLIENTES MANEJANTES</div></div>
+    </div>
+    <div class="statrow">
+      <div class="statbox"><div class="statn">${Math.round(mU).toLocaleString('es-CO')}</div><div class="statl">META UNIDADES</div></div>
+      <div class="statbox"><div class="statn">${Math.round(uV).toLocaleString('es-CO')}</div><div class="statl">UNIDADES</div></div>
+    </div>`;
+}
 function renderResumen(){
   const el=document.getElementById('TS');
   if(nav.lv==='grupos'){
-    let totC=0,totCN=0,totU=0,totUV=0;
-    GROUPS.forEach(g=>{ const m=grupoMetrics(g); totC+=m.mC; totCN+=m.cN; totU+=m.mU; totUV+=m.uV; });
+    let totCN=0,totcN=0,totCM=0,totcM=0,totU=0,totUV=0;
+    GROUPS.forEach(g=>{ const m=grupoMetrics(g); totCN+=m.mCN; totcN+=m.cN; totCM+=m.mCM; totcM+=m.cM; totU+=m.mU; totUV+=m.uV; });
     const wpGlobal=calcWorkdayProgress('A_TAT');
     let h=crumb([{label:'Todos los Grupos'}]);
     h+=quoteBanner();
-    h+=kpiBanner(totC,totCN,totU,totUV,wpGlobal);
+    h+=kpiBanner(totCN,totcN,totCM,totcM,totU,totUV,wpGlobal);
     h+='<div class="gg">';
     GROUPS.forEach(g=>{
       const m=grupoMetrics(g);
       const wp=calcWorkdayProgress(g);
-      const avg=(m.pctC+m.pctU)/2;
+      const avg=(m.pctCN+m.pctCM+m.pctU)/3;
       const col=semColor(avg, wp.pct);
       const baja=rutaMasBaja(g);
-      const faltC=Math.max(0,Math.round(m.mC-m.cN)), faltU=Math.max(0,Math.round(m.mU-m.uV));
+      const faltCN=Math.max(0,Math.round(m.mCN-m.cN)), faltU=Math.max(0,Math.round(m.mU-m.uV));
       h+=`<div class="card" onclick="goRutas('${g}')">
         <div class="gcardhead"><span class="gicon">🌐</span><span class="gname">${g}</span>
         <span class="gbadge">${GROUP_INFO[g].badge}</span>
         <span class="pill ${col}" style="margin-left:auto">${avg.toFixed(0)}%</span></div>
-        <div class="gcardsub">${GROUP_INFO[g].zone} · ${m.rutas} rutas · ${Math.round(m.mC).toLocaleString('es-CO')} clientes meta</div>
-        <div class="statrow">
-          <div class="statbox"><div class="statn">${Math.round(m.mC).toLocaleString('es-CO')}</div><div class="statl">META CLIENTES</div></div>
-          <div class="statbox"><div class="statn">${Math.round(m.cN).toLocaleString('es-CO')}</div><div class="statl">CLIENTES</div></div>
-        </div>
-        <div class="statrow">
-          <div class="statbox"><div class="statn">${Math.round(m.mU).toLocaleString('es-CO')}</div><div class="statl">META UNIDADES</div></div>
-          <div class="statbox"><div class="statn">${Math.round(m.uV).toLocaleString('es-CO')}</div><div class="statl">UNIDADES</div></div>
-        </div>
+        <div class="gcardsub">${GROUP_INFO[g].zone} · ${m.rutas} rutas</div>
+        ${statPairs(m.mCN,m.cN,m.mCM,m.cM,m.mU,m.uV)}
         <div class="genlbl"><span>Avance general</span><b>${avg.toFixed(0)}%</b></div>
         ${barHtml(avg,wp.pct,col)}
         <div class="gcardfoot">
-          <span>🎯 ${faltC.toLocaleString('es-CO')} clientes y ${faltU.toLocaleString('es-CO')} unid. faltantes</span>
+          <span>🎯 ${faltCN.toLocaleString('es-CO')} clientes nuevos y ${faltU.toLocaleString('es-CO')} unid. faltantes</span>
           ${baja?'<span>Ruta más baja: '+baja.ruta+' ('+baja.avg.toFixed(0)+'%)</span>':''}
         </div>
         <div class="gc2ft" style="margin-top:10px;font-size:11.5px;color:var(--ink2);display:flex;justify-content:space-between;align-items:center">
@@ -628,23 +646,16 @@ function renderResumen(){
     let h=crumb(items);
     const wp=calcWorkdayProgress(g);
     const m=grupoMetrics(g);
-    h+=kpiBanner(m.mC,m.cN,m.mU,m.uV,wp);
+    h+=kpiBanner(m.mCN,m.cN,m.mCM,m.cM,m.mU,m.uV,wp);
     h+='<div class="gg">';
     USERS.filter(x=>x.rol==='Vend'&&x.g===g).forEach(x=>{
       const rm=rutaMetrics(x.u);
       const col=semColor(rm.avg, wp.pct);
       h+=`<div class="card" onclick="goDetalle('${x.u}')">
         <div class="gcardhead"><span class="gname">${x.u}</span>
-        ${rm.ganador?'<span class="pill gold">🏆</span>':rm.cumpleAmbas?'<span class="pill gold">✓</span>':''}
+        ${rm.ganador?'<span class="pill gold">🏆</span>':rm.cumpleTodas?'<span class="pill gold">✓</span>':''}
         <span class="pill ${col}" style="margin-left:auto">${rm.avg.toFixed(0)}%</span></div>
-        <div class="statrow">
-          <div class="statbox"><div class="statn">${rm.metaClientes}</div><div class="statl">META CLIENTES</div></div>
-          <div class="statbox"><div class="statn">${Math.round(rm.clientesNuevos)}</div><div class="statl">CLIENTES</div></div>
-        </div>
-        <div class="statrow">
-          <div class="statbox"><div class="statn">${rm.metaUnidades}</div><div class="statl">META UNIDADES</div></div>
-          <div class="statbox"><div class="statn">${Math.round(rm.unidadesVendidas)}</div><div class="statl">UNIDADES</div></div>
-        </div>
+        ${statPairs(rm.metaClientesNuevos,rm.clientesNuevos,rm.metaClientesManejantes,rm.clientesManejantes,rm.metaUnidades,rm.unidadesVendidas)}
         <div class="genlbl"><span>Avance general</span><b>${rm.avg.toFixed(0)}%</b></div>
         ${barHtml(rm.avg,wp.pct,col)}
       </div>`;
@@ -657,7 +668,8 @@ function renderResumen(){
     const ruta=nav.ruta, m=rutaMetrics(ruta);
     if(!m){ el.innerHTML='<div class="banner">Sin datos para esta ruta todavía.</div>'; return; }
     const wp=calcWorkdayProgress(m.grupo);
-    const colC=semColor(m.pctC,wp.pct), colU=semColor(m.pctU,wp.pct);
+    const colCN=semColor(m.pctCN,wp.pct), colCM=semColor(m.pctCM,wp.pct), colU=semColor(m.pctU,wp.pct);
+    const pctColor=c=>c==='gold'?'var(--gold)':c==='green'?'var(--good)':c==='yellow'?'var(--warn)':'var(--bad)';
     const items = me.rol==='Vend' ? [{label:ruta}] : [{label:'Todos los Grupos',fn:'goGrupos()'},{label:GROUP_INFO[m.grupo].label,fn:"goRutas('"+m.grupo+"')"},{label:ruta}];
     let h=crumb(items);
     h+=`<div class="kc" style="text-align:left;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
@@ -668,20 +680,27 @@ function renderResumen(){
       <div class="goalcard c">
         <div class="goalicon">👤</div>
         <div class="goaltitle">Meta de Clientes Nuevos</div>
-        <div class="goalnum">${Math.round(m.clientesNuevos)} <span>/ ${m.metaClientes}</span></div>
-        <div class="goalpct" style="color:${colC==='gold'?'var(--gold)':colC==='green'?'var(--good)':colC==='yellow'?'var(--warn)':'var(--bad)'}">${m.pctC.toFixed(0)}% cumplido</div>
-        <div class="goalbar">${barInner(m.pctC,wp.pct,colC)}</div>
+        <div class="goalnum">${Math.round(m.clientesNuevos)} <span>/ ${m.metaClientesNuevos}</span></div>
+        <div class="goalpct" style="color:${pctColor(colCN)}">${m.pctCN.toFixed(0)}% cumplido</div>
+        <div class="goalbar">${barInner(m.pctCN,wp.pct,colCN)}</div>
+      </div>
+      <div class="goalcard c">
+        <div class="goalicon">🧑‍🤝‍🧑</div>
+        <div class="goaltitle">Meta de Clientes Manejantes</div>
+        <div class="goalnum">${Math.round(m.clientesManejantes)} <span>/ ${m.metaClientesManejantes}</span></div>
+        <div class="goalpct" style="color:${pctColor(colCM)}">${m.pctCM.toFixed(0)}% cumplido</div>
+        <div class="goalbar">${barInner(m.pctCM,wp.pct,colCM)}</div>
       </div>
       <div class="goalcard u">
         <div class="goalicon">📦</div>
         <div class="goaltitle">Meta de Unidades</div>
         <div class="goalnum">${Math.round(m.unidadesVendidas)} <span>/ ${m.metaUnidades}</span></div>
-        <div class="goalpct" style="color:${colU==='gold'?'var(--gold)':colU==='green'?'var(--good)':colU==='yellow'?'var(--warn)':'var(--bad)'}">${m.pctU.toFixed(0)}% cumplido</div>
+        <div class="goalpct" style="color:${pctColor(colU)}">${m.pctU.toFixed(0)}% cumplido</div>
         <div class="goalbar">${barInner(m.pctU,wp.pct,colU)}</div>
       </div>
     </div>`;
     h+= m.ganador?'<div class="winner" style="margin-top:14px">🏆 ¡Cumple todas las condiciones del reto! Gana $'+curCampaign().premio.toLocaleString('es-CO')+'</div>'
-      : m.cumpleAmbas?'<div class="winner" style="margin-top:14px;background:var(--good-bg);color:var(--good)">✓ Cumple meta de clientes y unidades. Falta validar presupuesto de lácteos.</div>':'';
+      : m.cumpleTodas?'<div class="winner" style="margin-top:14px;background:var(--good-bg);color:var(--good)">✓ Cumple las 3 metas. Falta validar presupuesto de lácteos.</div>':'';
     el.innerHTML=h;
   }
 }
@@ -693,26 +712,26 @@ function goDetalle(ruta){ nav={lv:'detalle', g:(D[cur]&&D[cur][ruta])?D[cur][rut
 function renderRanking(){
   const el=document.getElementById('TR');
   const all=USERS.filter(x=>x.rol==='Vend').map(x=>rutaMetrics(x.u)).filter(Boolean);
-  const cumplen=all.filter(x=>x.cumpleAmbas).sort((a,b)=>b.avg-a.avg);
-  const enCamino=all.filter(x=>!x.cumpleAmbas).sort((a,b)=>b.avg-a.avg);
+  const cumplen=all.filter(x=>x.cumpleTodas).sort((a,b)=>b.avg-a.avg);
+  const enCamino=all.filter(x=>!x.cumpleTodas).sort((a,b)=>b.avg-a.avg);
   let h=`<div class="rulecard" style="margin-bottom:14px">
     <h3>🏅 Ranking · ${curCampaign().name}</h3>
-    <div style="font-size:12.5px;color:var(--ink2)">Solo entran al top quienes ya cumplieron <b>ambas</b> metas (clientes nuevos y unidades). El resto se muestra debajo, ordenado por avance.</div>
+    <div style="font-size:12.5px;color:var(--ink2)">Solo entran al top quienes ya cumplieron <b>las 3 metas</b> (clientes nuevos, clientes manejantes y unidades). El resto se muestra debajo, ordenado por avance.</div>
   </div>`;
-  h+='<table class="rktbl"><thead><tr><th>#</th><th>Ruta</th><th>Grupo</th><th>Clientes</th><th>Unidades</th><th>Estado</th></tr></thead><tbody>';
-  h+='<tr class="sep"><td colspan="6">✅ Cumplen ambas metas</td></tr>';
-  if(cumplen.length===0) h+='<tr><td colspan="6" style="color:var(--ink2)">Todavía nadie cumple ambas metas.</td></tr>';
+  h+='<table class="rktbl"><thead><tr><th>#</th><th>Ruta</th><th>Grupo</th><th>Cl. Nuevos</th><th>Cl. Manejantes</th><th>Unidades</th><th>Estado</th></tr></thead><tbody>';
+  h+='<tr class="sep"><td colspan="7">✅ Cumplen las 3 metas</td></tr>';
+  if(cumplen.length===0) h+='<tr><td colspan="7" style="color:var(--ink2)">Todavía nadie cumple las 3 metas.</td></tr>';
   cumplen.forEach((r,i)=>{
     const mine = me.rol==='Vend' && me.u===r.ruta;
     h+=`<tr class="${mine?'me':''}"><td class="rkpos">${i+1}</td><td><b>${r.ruta}</b></td><td>${r.grupo}</td>
-      <td>${r.pctC.toFixed(0)}%</td><td>${r.pctU.toFixed(0)}%</td>
+      <td>${r.pctCN.toFixed(0)}%</td><td>${r.pctCM.toFixed(0)}%</td><td>${r.pctU.toFixed(0)}%</td>
       <td><span class="badge ${r.ganador?'pill gold':'pill green'}">${r.ganador?'🏆 Ganador':'✓ Cumple'}</span></td></tr>`;
   });
-  h+='<tr class="sep"><td colspan="6">⏳ En camino</td></tr>';
+  h+='<tr class="sep"><td colspan="7">⏳ En camino</td></tr>';
   enCamino.forEach((r,i)=>{
     const mine = me.rol==='Vend' && me.u===r.ruta;
     h+=`<tr class="${mine?'me':''}"><td class="rkpos">${cumplen.length+i+1}</td><td><b>${r.ruta}</b></td><td>${r.grupo}</td>
-      <td>${r.pctC.toFixed(0)}%</td><td>${r.pctU.toFixed(0)}%</td>
+      <td>${r.pctCN.toFixed(0)}%</td><td>${r.pctCM.toFixed(0)}%</td><td>${r.pctU.toFixed(0)}%</td>
       <td><span class="badge pill yellow">En camino</span></td></tr>`;
   });
   h+='</tbody></table>';
@@ -728,9 +747,10 @@ function renderReglas(){
   let h=`<div class="rulecard">
     <h3>🎯 ¿Cómo ganar el ${c.name}?</h3>
     <ul class="rulelist">
-      <li><span class="num">1</span><span>Cumplir la meta de <b>clientes nuevos</b> y la meta de <b>unidades</b> de ${c.producto} en tu ruta.</span></li>
+      <li><span class="num">1</span><span>Cumplir la meta de <b>clientes nuevos</b>, la meta de <b>clientes manejantes</b> y la meta de <b>unidades</b> de ${c.producto} en tu ruta.</span></li>
       <li><span class="num">2</span><span>Tener el cumplimiento de <b>presupuesto de lácteos por encima del 95%</b>.</span></li>
       <li><span class="num">3</span><span>Estar <b>vinculado laboralmente con Normandy</b> al momento de la verificación y el pago.</span></li>
+      <li><span class="num">4</span><span><b>No decrecer</b> frente al promedio histórico, tanto en clientes manejados como en unidades.</span></li>
     </ul>
   </div>
   <div class="rulecard">
@@ -743,7 +763,7 @@ function renderReglas(){
   </div>
   <div class="prizebox">
     <div class="amt">$${c.premio.toLocaleString('es-CO')}</div>
-    <div class="lbl">Para cada vendedor que cumpla las 3 condiciones</div>
+    <div class="lbl">Para cada vendedor que cumpla las 4 condiciones</div>
   </div>`;
   el.innerHTML=h;
 }
