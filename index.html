@@ -566,7 +566,8 @@ function barInner(pct,pace,color){
 }
 function kpiBanner(mCN,cN,mCM,cM,mU,uV,wp){
   const pctCN=mCN?cN/mCN*100:0, pctCM=mCM?cM/mCM*100:0, pctU=mU?uV/mU*100:0;
-  const clr=p=>semColor(p,wp.pct)==='red'?'var(--bad)':'var(--p)';
+  const semClr={green:'var(--good)', yellow:'var(--warn)', red:'var(--bad)'};
+  const clr=p=>semClr[semColor(p,wp.pct)];
   return `<div class="kgrid">
     <div class="kc"><div class="kn">${Math.round(mCN).toLocaleString('es-CO')}</div><div class="kl">Meta Clientes Nuevos</div><div class="ks">Canal completo</div></div>
     <div class="kc"><div class="kn" style="color:${clr(pctCN)}">${pctCN.toFixed(0)}%</div><div class="kl">Cumpl. Clientes Nuevos</div><div class="ks">${Math.round(cN).toLocaleString('es-CO')} de ${Math.round(mCN).toLocaleString('es-CO')}</div></div>
