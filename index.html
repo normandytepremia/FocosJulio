@@ -289,10 +289,10 @@ const QUOTE = { text:'"La meta no se cumple sola — se construye cliente a clie
 const CAMPAIGNS=[
   { id:'petit', name:'Reto Zoogur Petit', icon:'🍓', producto:'Zoogur Petit',
     csvUrl:'https://docs.google.com/spreadsheets/d/e/2PACX-1vS5dDBsTv_H62qye11Qp2MiZakW6kAQxRB3zUijxx_wQVw3mrFTim_PTdzjQDu0zScmjRsVBydkXSfa/pub?gid=0&single=true&output=csv',
-    start:'2026-07-20', end:'2026-08-01', premio:100000, activo:true, uniformDays:true },
+    start:'2026-07-21', end:'2026-08-01', premio:100000, activo:true, uniformDays:true },
   { id:'yomax', name:'Reto Yomax', icon:'🧃', producto:'Yomax',
     csvUrl:'https://docs.google.com/spreadsheets/d/e/2PACX-1vReHewBVkMXx_oYOh7WM_BYeG6iSjzyG5mkw-ee18pVbywTIeQliO-coxds2DzXJJBOsRP77nSHsMOz/pub?gid=0&single=true&output=csv',
-    start:'2026-07-20', end:'2026-08-01', premio:100000, activo:true, uniformDays:true }
+    start:'2026-07-21', end:'2026-08-01', premio:100000, activo:true, uniformDays:true }
 ];
 
 /* ─────────── USERS (contraseñas por defecto: usuario + "2026") ─────────── */
@@ -444,9 +444,8 @@ function calcWorkdayProgress(grupo){
   return { total, elapsed, pct: total? (elapsed/total*100):0 };
 }
 function semColor(pct, pace){
-  if(pct>=100) return 'gold';
   if(pct>=pace) return 'green';
-  if(pct>=pace-5) return 'yellow';
+  if(pct>=pace-3) return 'yellow';
   return 'red';
 }
 
@@ -750,7 +749,7 @@ function renderReglas(){
       <li><span class="num">1</span><span>Cumplir la meta de <b>clientes nuevos</b>, la meta de <b>clientes manejantes</b> y la meta de <b>unidades</b> de ${c.producto} en tu ruta.</span></li>
       <li><span class="num">2</span><span>Tener el cumplimiento de <b>presupuesto de lácteos por encima del 95%</b>.</span></li>
       <li><span class="num">3</span><span>Estar <b>vinculado laboralmente con Normandy</b> al momento de la verificación y el pago.</span></li>
-      <li><span class="num">4</span><span><b>No decrecer</b> frente al promedio histórico, tanto en clientes manejantes como en unidades.</span></li>
+      <li><span class="num">4</span><span><b>No decrecer</b> frente al promedio histórico, tanto en clientes manejados como en unidades.</span></li>
     </ul>
   </div>
   <div class="rulecard">
