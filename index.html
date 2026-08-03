@@ -129,10 +129,11 @@ header{background:var(--card);border-bottom:1px solid var(--line);padding:12px 2
 .gcardfoot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:10.5px;color:var(--ink2);margin-top:10px;font-weight:600}
 
 /* ═══ GOAL CARDS (vista de vendedor) ═══ */
-.goalgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.goalgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
 .goalcard{background:var(--card);border-radius:16px;padding:20px;box-shadow:var(--shadow);border:1px solid var(--line);
   border-top:4px solid var(--p2)}
 .goalcard.u{border-top-color:var(--gold)}
+.goalcard.g{border-top-color:var(--good); background:linear-gradient(180deg,var(--good-bg) 0%, var(--card) 55%)}
 .goalicon{font-size:24px;margin-bottom:4px}
 .goaltitle{font-size:12px;font-weight:800;color:var(--ink2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px}
 .goalnum{font-size:30px;font-weight:900;color:var(--ink);line-height:1}
@@ -179,10 +180,10 @@ header{background:var(--card);border-bottom:1px solid var(--line);padding:12px 2
 .abtn.sec{background:var(--ink)}
 .abtn.ok{background:var(--good)}
 
-@media(max-width:900px){.goalgrid{grid-template-columns:1fr}}
+@media(max-width:900px){.goalgrid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:640px){
   .mc{padding:14px 10px}
-  .gg,.statrow{grid-template-columns:1fr}
+  .gg,.statrow,.goalgrid{grid-template-columns:1fr}
   .lc{padding:30px 22px}
   .arow .who{width:90px}
   .hsub{display:none}
@@ -526,10 +527,13 @@ function rutaMetrics(ruta){
   const pctCN = d.metaClientesNuevos ? (d.clientesNuevos/d.metaClientesNuevos*100) : 0;
   const pctCM = d.metaClientesManejantes ? (d.clientesManejantes/d.metaClientesManejantes*100) : 0;
   const pctU  = d.metaUnidades ? (d.unidadesVendidas/d.metaUnidades*100) : 0;
-  const cumpleTodas = pctCN>=100 && pctCM>=100 && pctU>=100;
+  const metaClientesGeneral = d.metaClientesNuevos + d.metaClientesManejantes;
+  const clientesGeneral = d.clientesNuevos + d.clientesManejantes;
+  const pctCG = metaClientesGeneral ? (clientesGeneral/metaClientesGeneral*100) : 0;
+  const cumpleTodas = pctCG>=100 && pctU>=100;
   const ex=getExtra(cur, ruta);
   const ganador = cumpleTodas && ex.presupuesto===true;
-  return {...d, pctCN, pctCM, pctU, avg:(pctCN+pctCM+pctU)/3, cumpleTodas, ganador};
+  return {...d, pctCN, pctCM, pctU, metaClientesGeneral, clientesGeneral, pctCG, avg:(pctCG+pctU)/2, cumpleTodas, ganador};
 }
 function grupoMetrics(g){
   const rutas=USERS.filter(x=>x.rol==='Vend'&&x.g===g).map(x=>x.u);
@@ -538,8 +542,10 @@ function grupoMetrics(g){
     mCN+=d.metaClientesNuevos; mCM+=d.metaClientesManejantes; mU+=d.metaUnidades;
     cN+=d.clientesNuevos; cM+=d.clientesManejantes; uV+=d.unidadesVendidas; });
   const pctCN = mCN? cN/mCN*100:0, pctCM = mCM? cM/mCM*100:0, pctU = mU? uV/mU*100:0;
-  return { grupo:g, mCN, mCM, mU, cN, cM, uV, pctCN, pctCM, pctU, rutas: rutas.length };
+  const mCG = mCN+mCM, cG = cN+cM, pctCG = mCG? cG/mCG*100:0;
+  return { grupo:g, mCN, mCM, mU, cN, cM, uV, pctCN, pctCM, pctU, mCG, cG, pctCG, rutas: rutas.length };
 }
+
 
 /* ─────────── RENDER: RESUMEN ─────────── */
 function render(){
@@ -615,7 +621,7 @@ function renderResumen(){
     GROUPS.forEach(g=>{
       const m=grupoMetrics(g);
       const wp=calcWorkdayProgress(g);
-      const avg=(m.pctCN+m.pctCM+m.pctU)/3;
+      const avg=(m.pctCG+m.pctU)/2;
       const col=semColor(avg, wp.pct);
       const baja=rutaMasBaja(g);
       const faltCN=Math.max(0,Math.round(m.mCN-m.cN)), faltU=Math.max(0,Math.round(m.mU-m.uV));
@@ -676,7 +682,15 @@ function renderResumen(){
       <div><div class="cardname" style="font-size:16px">${ruta} · ${GROUP_INFO[m.grupo].label}</div>
       <div class="cardtag" style="margin-top:3px">📅 Día hábil ${wp.elapsed} de ${wp.total} del periodo (${wp.pct.toFixed(0)}% transcurrido)</div></div>
     </div>`;
+    const colCG=semColor(m.pctCG,wp.pct);
     h+=`<div class="goalgrid">
+      <div class="goalcard g">
+        <div class="goalicon">🎯</div>
+        <div class="goaltitle">Meta General de Clientes</div>
+        <div class="goalnum">${Math.round(m.clientesGeneral)} <span>/ ${m.metaClientesGeneral}</span></div>
+        <div class="goalpct" style="color:${pctColor(colCG)}">${m.pctCG.toFixed(0)}% cumplido</div>
+        <div class="goalbar">${barInner(m.pctCG,wp.pct,colCG)}</div>
+      </div>
       <div class="goalcard c">
         <div class="goalicon">👤</div>
         <div class="goaltitle">Meta de Clientes Nuevos</div>
@@ -700,7 +714,7 @@ function renderResumen(){
       </div>
     </div>`;
     h+= m.ganador?'<div class="winner" style="margin-top:14px">🏆 ¡Cumple todas las condiciones del reto! Gana $'+curCampaign().premio.toLocaleString('es-CO')+'</div>'
-      : m.cumpleTodas?'<div class="winner" style="margin-top:14px;background:var(--good-bg);color:var(--good)">✓ Cumple las 3 metas. Falta validar presupuesto de lácteos.</div>':'';
+      : m.cumpleTodas?'<div class="winner" style="margin-top:14px;background:var(--good-bg);color:var(--good)">✓ Cumple la meta general de clientes y la meta de unidades. Falta validar presupuesto de lácteos.</div>':'';
     el.innerHTML=h;
   }
 }
@@ -716,22 +730,22 @@ function renderRanking(){
   const enCamino=all.filter(x=>!x.cumpleTodas).sort((a,b)=>b.avg-a.avg);
   let h=`<div class="rulecard" style="margin-bottom:14px">
     <h3>🏅 Ranking · ${curCampaign().name}</h3>
-    <div style="font-size:12.5px;color:var(--ink2)">Solo entran al top quienes ya cumplieron <b>las 3 metas</b> (clientes nuevos, clientes manejantes y unidades). El resto se muestra debajo, ordenado por avance.</div>
+    <div style="font-size:12.5px;color:var(--ink2)">Solo entran al top quienes ya cumplieron la <b>meta general de clientes</b> (nuevos + manejantes sumados) y la <b>meta de unidades</b>. El resto se muestra debajo, ordenado por avance.</div>
   </div>`;
-  h+='<table class="rktbl"><thead><tr><th>#</th><th>Ruta</th><th>Grupo</th><th>Cl. Nuevos</th><th>Cl. Manejantes</th><th>Unidades</th><th>Estado</th></tr></thead><tbody>';
-  h+='<tr class="sep"><td colspan="7">✅ Cumplen las 3 metas</td></tr>';
-  if(cumplen.length===0) h+='<tr><td colspan="7" style="color:var(--ink2)">Todavía nadie cumple las 3 metas.</td></tr>';
+  h+='<table class="rktbl"><thead><tr><th>#</th><th>Ruta</th><th>Grupo</th><th>Clientes (general)</th><th>Unidades</th><th>Estado</th></tr></thead><tbody>';
+  h+='<tr class="sep"><td colspan="6">✅ Cumplen las 2 metas</td></tr>';
+  if(cumplen.length===0) h+='<tr><td colspan="6" style="color:var(--ink2)">Todavía nadie cumple las 2 metas.</td></tr>';
   cumplen.forEach((r,i)=>{
     const mine = me.rol==='Vend' && me.u===r.ruta;
     h+=`<tr class="${mine?'me':''}"><td class="rkpos">${i+1}</td><td><b>${r.ruta}</b></td><td>${r.grupo}</td>
-      <td>${r.pctCN.toFixed(0)}%</td><td>${r.pctCM.toFixed(0)}%</td><td>${r.pctU.toFixed(0)}%</td>
+      <td>${r.pctCG.toFixed(0)}%</td><td>${r.pctU.toFixed(0)}%</td>
       <td><span class="badge ${r.ganador?'pill gold':'pill green'}">${r.ganador?'🏆 Ganador':'✓ Cumple'}</span></td></tr>`;
   });
-  h+='<tr class="sep"><td colspan="7">⏳ En camino</td></tr>';
+  h+='<tr class="sep"><td colspan="6">⏳ En camino</td></tr>';
   enCamino.forEach((r,i)=>{
     const mine = me.rol==='Vend' && me.u===r.ruta;
     h+=`<tr class="${mine?'me':''}"><td class="rkpos">${cumplen.length+i+1}</td><td><b>${r.ruta}</b></td><td>${r.grupo}</td>
-      <td>${r.pctCN.toFixed(0)}%</td><td>${r.pctCM.toFixed(0)}%</td><td>${r.pctU.toFixed(0)}%</td>
+      <td>${r.pctCG.toFixed(0)}%</td><td>${r.pctU.toFixed(0)}%</td>
       <td><span class="badge pill yellow">En camino</span></td></tr>`;
   });
   h+='</tbody></table>';
@@ -747,7 +761,7 @@ function renderReglas(){
   let h=`<div class="rulecard">
     <h3>🎯 ¿Cómo ganar el ${c.name}?</h3>
     <ul class="rulelist">
-      <li><span class="num">1</span><span>Cumplir la meta de <b>clientes nuevos</b>, la meta de <b>clientes manejantes</b> y la meta de <b>unidades</b> de ${c.producto} en tu ruta.</span></li>
+      <li><span class="num">1</span><span>Cumplir la <b>meta general de clientes</b> (nuevos + manejantes sumados) y la <b>meta de unidades</b> de ${c.producto} en tu ruta.</span></li>
       <li><span class="num">2</span><span>Tener el cumplimiento de <b>presupuesto de lácteos por encima del 95%</b>.</span></li>
       <li><span class="num">3</span><span>Estar <b>vinculado laboralmente con Normandy</b> al momento de la verificación y el pago.</span></li>
       <li><span class="num">4</span><span><b>No decrecer</b> frente al promedio histórico, tanto en clientes manejados como en unidades.</span></li>
