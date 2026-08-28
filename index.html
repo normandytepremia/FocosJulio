@@ -295,7 +295,7 @@ const CAMPAIGNS=[
     start:'2026-07-21', end:'2026-08-01', premio:100000, activo:false, uniformDays:true, hasUnidades:true, verif:'1 al 5 de agosto', pago:'Primera quincena de agosto' },
   { id:'cocadas', name:'Foco Cocadas', icon:'🥥', producto:'Cocadas',
     csvUrl:'https://docs.google.com/spreadsheets/d/e/2PACX-1vRgnX2s_FRXMYXipIdiZgFAYuNBYDopLSB_4TLSFgxdNIumK4uR4uEACsg0l-Ow2UyKjwaeOraqqtXu/pub?gid=0&single=true&output=csv',
-    start:'2026-08-10', end:'2026-09-05', premio:100000, activo:true, uniformDays:false, hasUnidades:false }
+    start:'2026-09-01', end:'2026-09-26', premio:100000, activo:true, uniformDays:false, hasUnidades:false }
 ];
 
 /* ─────────── USERS (contraseñas por defecto: usuario + "2026") ─────────── */
@@ -789,8 +789,8 @@ function renderReglas(){
     <h3>📅 Fechas importantes</h3>
     <ul class="rulelist">
       <li><span class="num">1</span><span><b>${startFmt} al ${endFmt}</b>: periodo de medición. Se mide el cumplimiento de meta de clientes${hasU?' y de unidades':''}.</span></li>
-      <li><span class="num">2</span><span><b>${c.verif||'Aún por confirmar'}</b>: verificación de ganadores.</span></li>
-      <li><span class="num">3</span><span><b>${c.pago||'Aún por confirmar'}</b>: pago de la bonificación a quienes cumplan las condiciones.</span></li>
+      <li><span class="num">2</span><span><b>${c.verif||'Primeros 5 dias de Octubre'}</b>: verificación de ganadores.</span></li>
+      <li><span class="num">3</span><span><b>${c.pago||'Primera quincena de octubre'}</b>: pago de la bonificación a quienes cumplan las condiciones.</span></li>
     </ul>
   </div>
   <div class="prizebox">
