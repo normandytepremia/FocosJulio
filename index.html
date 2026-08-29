@@ -314,7 +314,6 @@ const USERS=[
   {rol:'Vend', u:'A_ORC',  p:'A_ORC2026',  g:'A_TAT'},
   {rol:'Vend', u:'A_QUI',  p:'A_QUI2026',  g:'A_TAT'},
   {rol:'Vend', u:'A_RIS',  p:'A_RIS2026',  g:'A_TAT'},
-  {rol:'Vend', u:'A_SOA',  p:'A_SOA2026',  g:'A_TAT'},
   {rol:'Vend', u:'P_PER1', p:'P_PER12026', g:'P_PER'},
   {rol:'Vend', u:'P_PER2', p:'P_PER22026', g:'P_PER'},
   {rol:'Vend', u:'P_PER3', p:'P_PER32026', g:'P_PER'},
@@ -782,15 +781,15 @@ function renderReglas(){
       <li><span class="num">1</span><span>Cumplir la <b>meta general de clientes</b> (nuevos + manejantes sumados)${hasU?' y la <b>meta de unidades</b>':''} de ${c.producto} en tu ruta.</span></li>
       <li><span class="num">2</span><span>Tener el cumplimiento de <b>presupuesto de lácteos por encima del 95%</b>.</span></li>
       <li><span class="num">3</span><span>Estar <b>vinculado laboralmente con Normandy</b> al momento de la verificación y el pago.</span></li>
-      <li><span class="num">4</span><span><b>No decrecer</b> frente al promedio histórico, tanto en clientes manejantes${hasU?' como en unidades':''}.</span></li>
+      <li><span class="num">4</span><span><b>No decrecer</b> frente al promedio histórico, tanto en clientes manejados${hasU?' como en unidades':''}.</span></li>
     </ul>
   </div>
   <div class="rulecard">
     <h3>📅 Fechas importantes</h3>
     <ul class="rulelist">
       <li><span class="num">1</span><span><b>${startFmt} al ${endFmt}</b>: periodo de medición. Se mide el cumplimiento de meta de clientes${hasU?' y de unidades':''}.</span></li>
-      <li><span class="num">2</span><span><b>${c.verif||'Primeros 5 dias de Octubre'}</b>: verificación de ganadores.</span></li>
-      <li><span class="num">3</span><span><b>${c.pago||'Primera quincena de octubre'}</b>: pago de la bonificación a quienes cumplan las condiciones.</span></li>
+      <li><span class="num">2</span><span><b>${c.verif||'Aún por confirmar'}</b>: verificación de ganadores.</span></li>
+      <li><span class="num">3</span><span><b>${c.pago||'Aún por confirmar'}</b>: pago de la bonificación a quienes cumplan las condiciones.</span></li>
     </ul>
   </div>
   <div class="prizebox">
