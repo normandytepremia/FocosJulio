@@ -289,7 +289,7 @@ const QUOTE = { text:'"La meta no se cumple sola — se construye cliente a clie
 const CAMPAIGNS=[
   { id:'petit', name:'Reto Zoogur Petit', icon:'🍓', producto:'Zoogur Petit',
     csvUrl:'https://docs.google.com/spreadsheets/d/e/2PACX-1vS5dDBsTv_H62qye11Qp2MiZakW6kAQxRB3zUijxx_wQVw3mrFTim_PTdzjQDu0zScmjRsVBydkXSfa/pub?gid=0&single=true&output=csv',
-    start:'2026-07-21', end:'2026-08-01', premio:100000, activo:false, uniformDays:true, hasUnidades:true, verif:'1 al 5 de agosto', pago:'Primera quincena de agosto' },
+    start:'2026-07-21', end:'2026-08-01', premio:100000, activo:true, uniformDays:true, hasUnidades:true, verif:'1 al 5 de agosto', pago:'Primera quincena de agosto' },
   { id:'yomax', name:'Reto Yomax', icon:'🧃', producto:'Yomax',
     csvUrl:'https://docs.google.com/spreadsheets/d/e/2PACX-1vReHewBVkMXx_oYOh7WM_BYeG6iSjzyG5mkw-ee18pVbywTIeQliO-coxds2DzXJJBOsRP77nSHsMOz/pub?gid=0&single=true&output=csv',
     start:'2026-07-21', end:'2026-08-01', premio:100000, activo:false, uniformDays:true, hasUnidades:true, verif:'1 al 5 de agosto', pago:'Primera quincena de agosto' },
@@ -779,7 +779,7 @@ function renderReglas(){
     <h3>🎯 ¿Cómo ganar el ${c.name}?</h3>
     <ul class="rulelist">
       <li><span class="num">1</span><span>Cumplir la <b>meta general de clientes</b> (nuevos + manejantes sumados)${hasU?' y la <b>meta de unidades</b>':''} de ${c.producto} en tu ruta.</span></li>
-      <li><span class="num">2</span><span>Tener el cumplimiento de <b>presupuesto de industria por encima del 95%</b>.</span></li>
+      <li><span class="num">2</span><span>Tener el cumplimiento de <b>presupuesto de lácteos por encima del 95%</b>.</span></li>
       <li><span class="num">3</span><span>Estar <b>vinculado laboralmente con Normandy</b> al momento de la verificación y el pago.</span></li>
       <li><span class="num">4</span><span><b>No decrecer</b> frente al promedio histórico, tanto en clientes manejados${hasU?' como en unidades':''}.</span></li>
     </ul>
@@ -788,8 +788,8 @@ function renderReglas(){
     <h3>📅 Fechas importantes</h3>
     <ul class="rulelist">
       <li><span class="num">1</span><span><b>${startFmt} al ${endFmt}</b>: periodo de medición. Se mide el cumplimiento de meta de clientes${hasU?' y de unidades':''}.</span></li>
-      <li><span class="num">2</span><span><b>${c.verif||'Primeros 5 días de Octubre'}</b>: verificación de ganadores.</span></li>
-      <li><span class="num">3</span><span><b>${c.pago||'Primera quincena de Octubre'}</b>: pago de la bonificación a quienes cumplan las condiciones.</span></li>
+      <li><span class="num">2</span><span><b>${c.verif||'Aún por confirmar'}</b>: verificación de ganadores.</span></li>
+      <li><span class="num">3</span><span><b>${c.pago||'Aún por confirmar'}</b>: pago de la bonificación a quienes cumplan las condiciones.</span></li>
     </ul>
   </div>
   <div class="prizebox">
@@ -806,7 +806,17 @@ function renderAdmin(){
   let h=`<div class="adminbox"><h4>⚙️ Panel del Administrador · ${c.icon} ${c.name}</h4>`;
   h+='<button class="abtn" onclick="loadCampaignData(cur)">🔄 Recargar datos del Sheets</button>';
   h+='<button class="abtn sec" onclick="downloadUpdatedHTML()">⬇️ Descargar HTML con cambios</button>';
-  h+='<div style="font-size:11.5px;color:var(--ink2);margin-top:8px">Los cambios de contraseñas y condiciones adicionales se pierden al cerrar la página si no descargas y vuelves a subir el HTML a GitHub. Las contraseñas y este archivo aplican a <b>todas</b> las campañas.</div>';
+  h+='<div style="font-size:11.5px;color:var(--ink2);margin-top:8px">Los cambios de contraseñas, focos activos y condiciones adicionales se pierden al cerrar la página si no descargas y vuelves a subir el HTML a GitHub. Las contraseñas y este archivo aplican a <b>todas</b> las campañas.</div>';
+  h+='</div>';
+
+  h+='<div class="adminbox"><h4>🎯 Focos activos (visibles para vendedores y coordinadores)</h4>';
+  CAMPAIGNS.forEach((camp,i)=>{
+    h+=`<div class="arow"><div class="who" style="width:auto;flex:1">${camp.icon} ${camp.name}</div>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;cursor:pointer">
+        <input type="checkbox" ${camp.activo?'checked':''} onchange="toggleCampaignActivo('${camp.id}',this.checked)"> Visible
+      </label></div>`;
+  });
+  h+='<div style="font-size:11.5px;color:var(--ink2);margin-top:8px">Desmarca un foco para ocultarlo del selector sin borrar su configuración ni sus datos — útil para dejarlo listo antes de su fecha de inicio y activarlo el día que corresponda.</div>';
   h+='</div>';
 
   h+=`<div class="adminbox"><h4>📋 Condiciones adicionales por ruta · ${c.producto} (presupuesto de lácteos)</h4>`;
@@ -837,9 +847,14 @@ function changePwd(i){
   document.getElementById('pw_'+i).value='';
   document.getElementById('pw_'+i).placeholder='✓ Actualizada (recuerda descargar el HTML)';
 }
+function toggleCampaignActivo(id, checked){
+  const camp=CAMPAIGNS.find(c=>c.id===id);
+  if(camp) camp.activo=checked;
+}
 function downloadUpdatedHTML(){
   if(!ORIGINAL_HTML){ alert('No se pudo cargar el archivo original todavía. Intenta de nuevo en unos segundos.'); return; }
   let out=ORIGINAL_HTML;
+  out=out.replace(/const CAMPAIGNS=\[[\s\S]*?\n\];/, 'const CAMPAIGNS='+JSON.stringify(CAMPAIGNS)+';');
   out=out.replace(/const USERS=\[[\s\S]*?\];/, 'const USERS='+JSON.stringify(USERS)+';');
   out=out.replace(/const EXTRA=[\s\S]*?;/, 'const EXTRA='+JSON.stringify(EXTRA)+';');
   const blob=new Blob([out], {type:'text/html'});
